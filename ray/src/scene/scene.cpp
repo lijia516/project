@@ -54,6 +54,7 @@ Scene::~Scene() {
 
 // Get any intersection with an object.  Return information about the 
 // intersection through the reference parameter.
+
 bool Scene::intersect(ray& r, isect& i) const {
 	double tmin = 0.0;
 	double tmax = 0.0;

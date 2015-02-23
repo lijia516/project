@@ -52,74 +52,62 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
     Vec3d q = r.at(i.t);
     Vec3d I = ke(i);
     
+    
+    
+    
     bool semiTransparent = false;   //////modify
     
     if (semiTransparent) {
         
-       I += ka(i) * scene->ambient() * (Vec3d(1.0, 1.0, 1.0) - kt(i));
+       I += ka(i) % (Vec3d(1.0, 1.0, 1.0) - kt(i));
         
     } else {
         
-        I += ka(i) * scene->ambient();
+        I += ka(i) % scene->ambient();
 
     }
     
     
-
+    std::cout<< "scene->ambient(): " << scene->ambient()<<"\n";
     
     for ( vector<Light*>::const_iterator litr = scene->beginLights(); litr != scene->endLights(); ++litr ) {
         
             Light* pLight = *litr;
         
+  //          ray light_ray (pLight->position, pLight->getDirection(), ray::VISIBILITY);
+        
             Vec3d atten = pLight->distanceAttenuation(q) * pLight->shadowAttenuation(r, q);
             Vec3d aa = pLight->shadowAttenuation(r, q);
-        
-        //    std::cout<< "distanceAttenuation(q): " << pLight->distanceAttenuation(q) << "\n";
-        
-        
-        
-       //     std::cout<< "pLight->shadowAttenuation(r, q): " << aa[0]  << ", " << aa[1]<< ", "<< aa[2]<< ", "<<"\n";
-    
-        
-    //    std::cout<< "atten: " << atten[0] << ", " << atten[1]<< ", "<< atten[2]<< ", "<<"\n";
         
             //diffuse reflection
             Vec3d N = i.N;
             Vec3d L = pLight->getDirection(q);
             Vec3d NL = N % L;
             double NLv = NL[0] + NL[1] + NL[2];
-            Vec3d diffuseTerm = kd(i) * shininess(i) * fmax(0, NLv);
-        
-        
-     /* std::cout<< "N: " << N[0]<< ", " << N[1]<< ", "<< N[2]<< ", "<<"\n";
-        std::cout<< "L: " << L[0]<< ", " << L[1]<< ", "<< L[2]<< ", "<<"\n";
-        std::cout<< "NL: " << NL[0]<< ", " << NL[1]<< ", "<< NL[2]<< ", "<<"\n";
-        std::cout<< "NLv: " << NLv<<"\n";
-      */
+            Vec3d diffuseTerm = kd(i) * fmax(0, NLv);
         
             //specular reflection
             Vec3d R = N * 2* NLv - L;
             Vec3d V = - r.getDirection();
             Vec3d RV =  R % V;
             double RVv = RV[0] + RV[1] + RV[2];
-            int ns = 2;
-            Vec3d specularTerm = ks(i) * shininess(i) * pow (fmax(0, RVv), ns);
+            int ns = 64;
+            Vec3d specularTerm = ks(i) * pow (fmax(0, RVv), ns);
         
-      /*      std::cout<< "R: " << R[0]<< ", " << R[1]<< ", "<< R[2]<< ", "<<"\n";
-            std::cout<< "V: " << V[0]<< ", " << V[1]<< ", "<< V[2]<< ", "<<"\n";
-            std::cout<< "RV: " << RV[0]<< ", " << RV[1]<< ", "<< RV[2]<< ", "<<"\n";
-           std::cout<< "RVv: " << RVv<<"\n";
+           ///////////////
         
-      */
-            I += (diffuseTerm + specularTerm) % atten ;
+        
+        //////light intensity can not found
+        
+        /////////
+            I += (diffuseTerm + specularTerm) % atten;
+       
         
           }
     
-    
-  //  std::cout<< "I: " << I[0]<< ", " << I[1]<< ", "<< I[2]<< ", "<<"\n";
-    
-    I= I / 255.0;
-    
+    //std::cout<< "ka(i): " << ka(i)[0]<< ", " << ka(i)[1]<< ", "<< ka(i)[2]<< ", "<<"\n";
+    //std::cout<< "I: " << I[0]<< ", " << I[1]<< ", "<< I[2]<< ", "<<"\n";
+ 
   return I;
 }
 

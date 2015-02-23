@@ -39,7 +39,7 @@ Vec3d RayTracer::trace(double x, double y)
   scene->getCamera().rayThrough(x,y,r);
   Vec3d ret = traceRay(r, traceUI->getDepth());
   ret.clamp();
-    if (ret[0] != 0) std::cout<< "ret: " << ret[0]<< ", " << ret[1]<< ", "<< ret[2]<< ", "<<"\n";
+  //  if (ret[0] != 0) std::cout<< "ret: " << ret[0]<< ", " << ret[1]<< ", "<< ret[2]<< ", "<<"\n";
   return ret;
 }
 
@@ -71,6 +71,8 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
 {
 	isect i;
 	Vec3d colorC;
+    
+    
 
 	if(scene->intersect(r, i)) {
 		// YOUR CODE HERE
@@ -83,12 +85,75 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
 		// Instead of just returning the result of shade(), add some
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
+        
 	  const Material& m = i.getMaterial();
 	  colorC = m.shade(scene, r, i);
         
-        std::cout<< "after shade\n";
-        std::cout<< "colorC: " << colorC[0]<< ", " << colorC[1]<< ", "<< colorC[2]<< ", "<<"\n";
+        if (depth < 1) {
+            
+         //   std::cout<< "after shade\n";
+         //   std::cout<< "colorC: " << colorC[0]<< ", " << colorC[1]<< ", "<< colorC[2]<< ", "<<"\n";
+            
+            
+            
+            
+            
+            
+            
+            return colorC;
+        }
+        
+        
+        
+        //////reflection
+        Vec3d N = i.N;
+        Vec3d V = - r.getDirection();
+        Vec3d NV = N % V;
+        double NVv = NV[0] + NV[1] + NV[2];
+        Vec3d R = i.N * 2* NVv - V;
+        
+        ray new_r = ray(r.at(i.t), R, ray::VISIBILITY);
+        colorC = colorC + m.kr(i) % traceRay(new_r,depth - 1);
        
+        
+     //   std::cout<< "m.ke(i): " << m.ke(i)[0]<< ", " << m.ke(i)[1]<< ", "<< m.ke(i)[2]<< ", "<<"\n";
+     //   std::cout<< "m.ka(i): " << m.ka(i)[0]<< ", " << m.ka(i)[1]<< ", "<< m.ka(i)[2]<< ", "<<"\n";
+     //   std::cout<< "m.kd(i): " << m.kd(i)[0]<< ", " << m.kd(i)[1]<< ", "<< m.kd(i)[2]<< ", "<<"\n";
+     //   std::cout<< "m.ks(i): " << m.ks(i)[0]<< ", " << m.ks(i)[1]<< ", "<< m.ks(i)[2]<< ", "<<"\n";
+        
+     //   std::cout<< "m.kr(i): " << m.kr(i)[0]<< ", " << m.kr(i)[1]<< ", "<< m.kr(i)[2]<< ", "<<"\n";
+     //   std::cout<< "m.kt(i): " << m.kt(i)[0]<< ", " << m.kt(i)[1]<< ", "<< m.kt(i)[2]<< ", "<<"\n";
+        
+        
+        // others
+        
+        
+
+        
+        
+        double nr = 0;
+        
+        // ray is entering object
+        if (NVv > 0)  nr = 1.0 / m.index(i);
+        else if (NVv < 0) nr = m.index(i);
+        
+        if (m.Trans()) {             /// if (m.Trans() && notTIR())  ?????????
+            
+            if ((1 - nr * nr * (1 - NVv * NVv)) < 0) return colorC;
+            
+            double cosQ = sqrt(1 - nr * nr * (1 - NVv * NVv));
+            Vec3d T;
+            
+            if (NVv > 0) T = N * (nr * NVv - cosQ) - V * nr;
+            else T = N * (-(nr * (-NVv) - cosQ)) - V * nr;
+            
+            
+            new_r = ray(r.at(i.t), T);
+            colorC = colorC + m.kt(i) % traceRay(new_r,depth - 1);
+        }
+        
+        
+        std::cout<< "m.Trans(): " <<m.Trans()<<"\n";
         
 	} else {
 		// No intersection.  This ray travels to infinity, so we color

@@ -38,29 +38,11 @@ double PointLight::distanceAttenuation(const Vec3d& P) const
   // of the light based on the distance between the source and the 
   // point P.  For now, we assume no attenuation and just return 1.0
     
-    
-    
     double d = (position - P).length();
-    double a = 0;
-    double b = 0;
-    double c = 1;
+    d = 1.0 / (constantTerm + linearTerm * d + quadraticTerm * d * d);
     
-    d = 1.0 / (a + b * d + c * d * d);
+    return min(d, 1.0);
     
-    /*
-     
-     double a = traceUI->get_slidervalue(ATTENU_CONSTANT);
-     double b = traceUI->get_slidervalue(ATTENU_LINEAR);
-     double c = traceUI->get_slidervalue(ATTENU_QUAD);
-     if (d < 1) d = 1.0;
-     
-     */
-    
-    return d;
-    
-  //  System.out.println("distanceAttenu: " + d);
-    
-    //return 1.0;
 }
 
 Vec3d PointLight::getColor() const
@@ -76,9 +58,21 @@ Vec3d PointLight::getDirection(const Vec3d& P) const
 }
 
 
-Vec3d PointLight::shadowAttenuation(const ray& r, const Vec3d& p) const
+Vec3d PointLight::shadowAttenuation( const ray& r, const Vec3d& p) const
 {
   // YOUR CODE HERE:
   // You should implement shadow-handling code here.
+    
+ //   isect i;
+ //   ray light_ray(position, getDirection(p), ray::VISIBILITY);
+    
+  //  if (scene->intersect(light_ray, i)) {
+        
+  //      Vec3d q_m = light_ray.at(i.t);
+  //      if ((p - position).length() > (q_m - position).length()) {
+   //         return Vec3d(0,0,0);
+   //     }
+  //  }
+    
   return Vec3d(1,1,1);
 }
