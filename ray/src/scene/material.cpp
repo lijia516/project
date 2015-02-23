@@ -2,7 +2,7 @@
 #include "ray.h"
 #include "light.h"
 #include "../ui/TraceUI.h"
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 extern TraceUI* traceUI;
@@ -59,16 +59,13 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
     
     if (Trans()) {
         
-       I += ka(i) % (Vec3d(1.0, 1.0, 1.0) - kt(i)) % scene->ambient();
+       I = I + ka(i) % (Vec3d(1.0, 1.0, 1.0) - kt(i)) % scene->ambient();
         
     } else {
         
-        I += ka(i) % scene->ambient();
+        I = I + ka(i) % scene->ambient();
 
     }
-    
-    
-    std::cout<< "scene->ambient(): " << scene->ambient()<<"\n";
     
     for ( vector<Light*>::const_iterator litr = scene->beginLights(); litr != scene->endLights(); ++litr ) {
         
@@ -77,7 +74,7 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
             Vec3d atten = pLight->distanceAttenuation(q) * pLight->shadowAttenuation(r, q);
             Vec3d aa = pLight->shadowAttenuation(r, q);
         
-            //diffuse reflection
+            //diffuse
             Vec3d N = i.N;
             Vec3d L = pLight->getDirection(q);
             Vec3d NL = N % L;
@@ -93,8 +90,7 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
             Vec3d specularTerm = ks(i) * pow (fmax(0, RVv), ns);
         
         
-            I += (diffuseTerm + specularTerm) % atten % pLight->getColor();
-       
+            I = I + (diffuseTerm + specularTerm) % atten % pLight->getColor();
         
           }
     
