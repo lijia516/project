@@ -57,9 +57,9 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
     
     bool semiTransparent = false;   //////modify
     
-    if (semiTransparent) {
+    if (Trans()) {
         
-       I += ka(i) % (Vec3d(1.0, 1.0, 1.0) - kt(i));
+       I += ka(i) % (Vec3d(1.0, 1.0, 1.0) - kt(i)) % scene->ambient();
         
     } else {
         
@@ -73,8 +73,6 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
     for ( vector<Light*>::const_iterator litr = scene->beginLights(); litr != scene->endLights(); ++litr ) {
         
             Light* pLight = *litr;
-        
-  //          ray light_ray (pLight->position, pLight->getDirection(), ray::VISIBILITY);
         
             Vec3d atten = pLight->distanceAttenuation(q) * pLight->shadowAttenuation(r, q);
             Vec3d aa = pLight->shadowAttenuation(r, q);
@@ -94,13 +92,8 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
             int ns = 64;
             Vec3d specularTerm = ks(i) * pow (fmax(0, RVv), ns);
         
-           ///////////////
         
-        
-        //////light intensity can not found
-        
-        /////////
-            I += (diffuseTerm + specularTerm) % atten;
+            I += (diffuseTerm + specularTerm) % atten % pLight->getColor();
        
         
           }

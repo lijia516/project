@@ -94,12 +94,6 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
          //   std::cout<< "after shade\n";
          //   std::cout<< "colorC: " << colorC[0]<< ", " << colorC[1]<< ", "<< colorC[2]<< ", "<<"\n";
             
-            
-            
-            
-            
-            
-            
             return colorC;
         }
         
@@ -114,21 +108,6 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
         
         ray new_r = ray(r.at(i.t), R, ray::VISIBILITY);
         colorC = colorC + m.kr(i) % traceRay(new_r,depth - 1);
-       
-        
-     //   std::cout<< "m.ke(i): " << m.ke(i)[0]<< ", " << m.ke(i)[1]<< ", "<< m.ke(i)[2]<< ", "<<"\n";
-     //   std::cout<< "m.ka(i): " << m.ka(i)[0]<< ", " << m.ka(i)[1]<< ", "<< m.ka(i)[2]<< ", "<<"\n";
-     //   std::cout<< "m.kd(i): " << m.kd(i)[0]<< ", " << m.kd(i)[1]<< ", "<< m.kd(i)[2]<< ", "<<"\n";
-     //   std::cout<< "m.ks(i): " << m.ks(i)[0]<< ", " << m.ks(i)[1]<< ", "<< m.ks(i)[2]<< ", "<<"\n";
-        
-     //   std::cout<< "m.kr(i): " << m.kr(i)[0]<< ", " << m.kr(i)[1]<< ", "<< m.kr(i)[2]<< ", "<<"\n";
-     //   std::cout<< "m.kt(i): " << m.kt(i)[0]<< ", " << m.kt(i)[1]<< ", "<< m.kt(i)[2]<< ", "<<"\n";
-        
-        
-        // others
-        
-        
-
         
         
         double nr = 0;
@@ -153,7 +132,7 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
         }
         
         
-        std::cout<< "m.Trans(): " <<m.Trans()<<"\n";
+     //   std::cout<< "m.Trans(): " <<m.Trans()<<"\n";
         
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
