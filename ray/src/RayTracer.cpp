@@ -226,3 +226,27 @@ void RayTracer::traceSetup(int w, int h)
 	m_bBufferReady = true;
 }
 
+
+void RayTracer::antiAliased(int sampling, int i, int j) {
+    
+    double x_gap = 1 / double(buffer_width);
+    double y_gap = 1 / double(buffer_height);
+    
+    double x = double(i)/double(buffer_width);
+    double y = double(j)/double(buffer_height);
+    
+    unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
+
+    
+    Vec3d color = trace( x,y );
+    
+    for (int i = 1; i < sampling; i++) {
+        
+        color += trace( x + (rand() % 10 * 1.0 / 10) * x_gap, y + (rand() % 10 * 1.0 / 10) * y_gap);
+    }
+
+    color /= sampling;
+    pixel[0] = (int)( 255.0 * color[0]);
+    pixel[1] = (int)( 255.0 * color[1]);
+    pixel[2] = (int)( 255.0 * color[2]);
+}

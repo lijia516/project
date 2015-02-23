@@ -116,10 +116,19 @@ void GraphicalUI::cb_sizeSlides(Fl_Widget* o, void* v)
 	pUI->m_traceGlWindow->resizeWindow(width, height);
 }
 
+
+
 void GraphicalUI::cb_depthSlides(Fl_Widget* o, void* v)
 {
 	((GraphicalUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
 }
+
+
+void GraphicalUI::cb_samplingSlides(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_nSampling=int( ((Fl_Slider *)o)->value() ) ;
+}
+
 
 void GraphicalUI::cb_refreshSlides(Fl_Widget* o, void* v)
 {
@@ -199,6 +208,65 @@ void GraphicalUI::cb_stop(Fl_Widget* o, void* v)
 	stopTracing();
 }
 
+void GraphicalUI::cb_antiAliased(Fl_Widget* o, void* v)
+{
+   // pUI = (GraphicalUI*)(o->user_data());
+   // pUI->raytracer->antiAliased(pUI->getSampling());
+   // pUI->m_traceGlWindow->refresh();
+    
+    char buffer[256];
+    
+    pUI = (GraphicalUI*)(o->user_data());
+    doneTrace = stopTrace = false;
+    if (pUI->raytracer->sceneLoaded())
+    {
+        int width = pUI->getSize();
+        int height = (int)(width / pUI->raytracer->aspectRatio() + 0.5);
+        int origPixels = width * height;
+        pUI->m_traceGlWindow->resizeWindow(width, height);
+        pUI->m_traceGlWindow->show();
+        pUI->raytracer->traceSetup(width, height);
+        
+        // Save the window label
+        const char *old_label = pUI->m_traceGlWindow->label();
+        
+        clock_t now, prev;
+        now = prev = clock();
+        clock_t intervalMS = pUI->refreshInterval * 100;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (stopTrace) break;
+                // check for input and refresh view every so often while tracing
+                now = clock();
+                if ((now - prev)/CLOCKS_PER_SEC * 1000 >= intervalMS)
+                {
+                    prev = now;
+                    sprintf(buffer, "(%d%%) %s", (int)((double)y / (double)height * 100.0), old_label);
+                    pUI->m_traceGlWindow->label(buffer);
+                    pUI->m_traceGlWindow->refresh();
+                    Fl::check();
+                    if (Fl::damage()) { Fl::flush(); }
+                }
+                // look for input and refresh window
+                pUI->raytracer->antiAliased(pUI->getSampling(), x, y);
+                pUI->m_debuggingWindow->m_debuggingView->setDirty();
+            }
+            if (stopTrace) break;
+        }
+        doneTrace = true;
+        stopTrace = false;
+        // Restore the window label
+        pUI->m_traceGlWindow->label(old_label);
+        pUI->m_traceGlWindow->refresh();
+    }
+
+    
+    
+}
+
+
 int GraphicalUI::run()
 {
 	Fl::visual(FL_DOUBLE|FL_INDEX);
@@ -257,6 +325,11 @@ GraphicalUI::GraphicalUI() : refreshInterval(10) {
 	m_stopButton = new Fl_Button(360, 65, 70, 25, "&Stop");
 	m_stopButton->user_data((void*)(this));
 	m_stopButton->callback(cb_stop);
+    
+    // set up "antiAliased" button
+    m_antiAliasedButton = new Fl_Button(330, 125, 100, 25, "&Anti-aliased");
+    m_antiAliasedButton->user_data((void*)(this));
+    m_antiAliasedButton->callback(cb_antiAliased);
 
 	// install depth slider
 	m_depthSlider = new Fl_Value_Slider(10, 40, 180, 20, "Recursion Depth");
@@ -296,6 +369,22 @@ GraphicalUI::GraphicalUI() : refreshInterval(10) {
 	m_refreshSlider->value(refreshInterval);
 	m_refreshSlider->align(FL_ALIGN_RIGHT);
 	m_refreshSlider->callback(cb_refreshSlides);
+    
+    
+    
+    // install sampling slider
+    m_samplingSlider = new Fl_Value_Slider(10, 125, 180, 20, "Samples number");
+    m_samplingSlider->user_data((void*)(this));	// record self to be used by static callback functions
+    m_samplingSlider->type(FL_HOR_NICE_SLIDER);
+    m_samplingSlider->labelfont(FL_COURIER);
+    m_samplingSlider->labelsize(12);
+    m_samplingSlider->minimum(1);
+    m_samplingSlider->maximum(16);
+    m_samplingSlider->step(1);
+    m_samplingSlider->value(m_nSampling);
+    m_samplingSlider->align(FL_ALIGN_RIGHT);
+    m_samplingSlider->callback(cb_samplingSlides);
+    
 
 	// set up debugging display checkbox
 	m_debuggingDisplayCheckButton = new Fl_Check_Button(10, 429, 140, 20, "Debugging display");

@@ -43,7 +43,7 @@ public:
 	Fl_Slider*			m_refreshSlider;
 	Fl_Slider*			m_treeDepthSlider;
 	Fl_Slider*			m_leafSizeSlider;
-	Fl_Slider*			m_filterSlider;
+	Fl_Slider*			m_samplingSlider;
 
 	Fl_Check_Button*	m_debuggingDisplayCheckButton;
 	Fl_Check_Button*	m_aaCheckButton;
@@ -55,6 +55,7 @@ public:
 
 	Fl_Button*			m_renderButton;
 	Fl_Button*			m_stopButton;
+    Fl_Button*			m_antiAliasedButton;
 
 	CubeMapChooser*     m_cubeMapChooser;
 
@@ -91,9 +92,11 @@ private:
 	static void cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_depthSlides(Fl_Widget* o, void* v);
 	static void cb_refreshSlides(Fl_Widget* o, void* v);
+    static void cb_samplingSlides(Fl_Widget* o, void* v);
 
 	static void cb_render(Fl_Widget* o, void* v);
 	static void cb_stop(Fl_Widget* o, void* v);
+    static void cb_antiAliased(Fl_Widget* o, void* v);
 	static void cb_debuggingDisplayCheckButton(Fl_Widget* o, void* v);
 	static void cb_ssCheckButton(Fl_Widget* o, void* v);
 	static void cb_shCheckButton(Fl_Widget* o, void* v);

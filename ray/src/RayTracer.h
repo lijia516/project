@@ -24,6 +24,7 @@ public:
 	double aspectRatio();
 
 	void traceSetup( int w, int h );
+    void antiAliased(int sampling, int i, int j);
 
 	bool loadScene(char* fn);
 	bool sceneLoaded() { return scene != 0; }

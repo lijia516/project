@@ -18,7 +18,7 @@ class RayTracer;
 
 class TraceUI {
 public:
-	TraceUI() : m_nDepth(0), m_nSize(512), m_displayDebuggingInfo(false),
+	TraceUI() : m_nDepth(0), m_nSize(512), m_nSampling(1), m_displayDebuggingInfo(false),
                     m_shadows(true), m_smoothshade(true), raytracer(0),
                     m_nFilterWidth(1)
                     {}
@@ -36,6 +36,7 @@ public:
 	// accessors:
 	int	getSize() const { return m_nSize; }
 	int	getDepth() const { return m_nDepth; }
+    int	getSampling() const { return m_nSampling; }
 	int		getFilterWidth() const { return m_nFilterWidth; }
 
 	bool	shadowSw() const { return m_shadows; }
@@ -48,6 +49,7 @@ protected:
 
 	int	m_nSize;	// Size of the traced image
 	int	m_nDepth;	// Max depth of recursion
+    int	m_nSampling;	// number of samples
 
 	// Determines whether or not to show debugging information
 	// for individual rays.  Disabled by default for efficiency
