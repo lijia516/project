@@ -44,14 +44,22 @@ void GraphicalUI::cb_load_scene(Fl_Menu_* o, void* v)
 	static char* lastFile = 0;
 	char* newfile = fl_file_chooser("Open Scene?", "*.ray", NULL );
 
+    
+    std::cout<< "load file: " <<"\n";
+    
 	if (newfile != NULL) {
 		char buf[256];
-
+        std::cout<< "before load scence: " <<"\n";
 		if (pUI->raytracer->loadScene(newfile)) {
+            
+            std::cout<< "after load scence: " <<"\n";
+            
 			print(buf, "Ray <%s>", newfile);
 			stopTracing();	// terminate the previous rendering
 		} else print(buf, "Ray <Not Loaded>");
 
+        std::cout<< "after load scence if: " <<"\n";
+        
 		pUI->m_mainWindow->label(buf);
 		pUI->m_debuggingWindow->m_debuggingView->setDirty();
 
@@ -60,6 +68,10 @@ void GraphicalUI::cb_load_scene(Fl_Menu_* o, void* v)
 
 		pUI->m_debuggingWindow->redraw();
 	}
+    
+    
+    std::cout<< "finish load file: " <<"\n";
+    
 }
 
 void GraphicalUI::cb_save_image(Fl_Menu_* o, void* v) 
@@ -155,10 +167,16 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 
 	char buffer[256];
 
+    std::cout<< "render: " <<"\n";
+    
 	pUI = (GraphicalUI*)(o->user_data());
 	doneTrace = stopTrace = false;
 	if (pUI->raytracer->sceneLoaded())
 	  {
+          
+          
+          std::cout<< "render confi: " <<"\n";
+          
 		int width = pUI->getSize();
 		int height = (int)(width / pUI->raytracer->aspectRatio() + 0.5);
 		int origPixels = width * height;
@@ -166,6 +184,13 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 		pUI->m_traceGlWindow->show();
 		pUI->raytracer->traceSetup(width, height);
 
+          
+          std::cout<< "width, height: " << width <<","<<height<<"\n";
+          
+          std::cout<< "after traceSetup: " <<"\n";
+          
+          
+          
 		// Save the window label
                 const char *old_label = pUI->m_traceGlWindow->label();
 
@@ -189,6 +214,10 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 			    if (Fl::damage()) { Fl::flush(); }
 			  }
 			// look for input and refresh window
+                  
+                  
+           //  std::cout<< "before tracePixel: " <<"\n";
+                  
 			pUI->raytracer->tracePixel(x, y);
 			pUI->m_debuggingWindow->m_debuggingView->setDirty();
 		      }

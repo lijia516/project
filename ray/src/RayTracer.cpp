@@ -72,9 +72,12 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
 	isect i;
 	Vec3d colorC;
     
-    
+    std::cout<< "start trace: " <<"\n";
 
 	if(scene->intersect(r, i)) {
+        
+        
+        std::cout<< "has intersect: " <<"\n";
 		// YOUR CODE HERE
 
 		// An intersection occurred!  We've got work to do.  For now,
@@ -107,7 +110,13 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
         Vec3d R = i.N * 2* NVv - V;
         
         ray new_r = ray(r.at(i.t), R, ray::VISIBILITY);
-        colorC = colorC + m.kr(i) % traceRay(new_r,depth - 1);
+        
+        Vec3d a = m.kr(i) % traceRay(new_r,depth - 1);
+        
+        colorC = colorC + a;
+        
+        
+        std::cout<< "a: " << a[0]<< ", " << a[1]<< ", "<< a[2]<< ", "<<"\n";
         
         
         double nr = 0;
@@ -116,7 +125,7 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
         if (NVv > 0)  nr = 1.0 / m.index(i);
         else if (NVv < 0) nr = m.index(i);
         
-        if (m.Trans()) {             /// if (m.Trans() && notTIR())  ?????????
+        if (m.Trans()) {
             
             if ((1 - nr * nr * (1 - NVv * NVv)) < 0) return colorC;
             
@@ -131,8 +140,6 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
             colorC = colorC + m.kt(i) % traceRay(new_r,depth - 1);
         }
         
-        
-     //   std::cout<< "m.Trans(): " <<m.Trans()<<"\n";
         
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
@@ -169,6 +176,9 @@ double RayTracer::aspectRatio()
 }
 
 bool RayTracer::loadScene( char* fn ) {
+    
+    std::cout<< "load scence: " <<"\n";
+    
 	ifstream ifs( fn );
 	if( !ifs ) {
 		string msg( "Error: couldn't read scene file " );
