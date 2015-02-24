@@ -8,13 +8,15 @@ double DirectionalLight::distanceAttenuation(const Vec3d& P) const
 {
   // distance to light is infinite, so f(di) goes to 0.  Return 1.
     
-    std::cout<< "directionalLght: " <<"\n";
+ //   std::cout<< "DirectionalLight::distanceAttenuation " <<"\n";
   return 1.0;
 }
 
 
 Vec3d DirectionalLight::shadowAttenuation(const ray& r, const Vec3d& p) const
 {
+    
+ //   std::cout<< "DirectionalLight::shadowAttenuation " <<"\n";
   // YOUR CODE HERE:
   // You should implement shadow-handling code here.
     
@@ -46,6 +48,8 @@ Vec3d DirectionalLight::getDirection(const Vec3d& P) const
 
 double PointLight::distanceAttenuation(const Vec3d& P) const
 {
+    
+  //  std::cout<< "PointLight::distanceAttenuation " <<"\n";
 
   // YOUR CODE HERE
 
@@ -56,7 +60,7 @@ double PointLight::distanceAttenuation(const Vec3d& P) const
     double d = (position - P).length();
     d = 1.0 / (constantTerm + linearTerm * d + quadraticTerm * d * d);
     
-    std::cout<< "c, l, q: " << constantTerm << ", " << linearTerm<< ", "<< quadraticTerm << ", "<<"\n";
+  //  std::cout<< "c, l, q: " << constantTerm << ", " << linearTerm<< ", "<< quadraticTerm << ", "<<"\n";
     
     return min(d, 1.0);
     
@@ -79,6 +83,8 @@ Vec3d PointLight::shadowAttenuation( const ray& r, const Vec3d& p) const
 {
   // YOUR CODE HERE:
   // You should implement shadow-handling code here.
+    
+  //  std::cout<< "start PointLight::shadowAttenuation: " <<"\n";
     
     isect i;
     ray light_ray(p, getDirection(p), ray::VISIBILITY);

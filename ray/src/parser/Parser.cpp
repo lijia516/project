@@ -1073,6 +1073,9 @@ MaterialParameter Parser::parseVec3dMaterialParameter( Scene* scene )
     filename.append(parseIdent());
     _tokenizer.Read( RPAREN );
     _tokenizer.CondRead(SEMICOLON);
+      
+      std::cout<< "filename: " << filename <<"\n";
+      
     return MaterialParameter( scene->getTexture( filename ) );
   }
   else

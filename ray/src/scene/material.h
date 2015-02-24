@@ -87,7 +87,11 @@ public:
 
     explicit MaterialParameter( TextureMap* tex )
        : _textureMap( tex )
-    { }
+    {
+    
+    std::cout<< "material testureCache " <<"\n";
+    
+    }
 
     MaterialParameter()
        : _value( 0.0, 0.0, 0.0 ), _textureMap( 0 )

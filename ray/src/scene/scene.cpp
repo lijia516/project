@@ -7,8 +7,16 @@
 using namespace std;
 
 bool Geometry::intersect(ray& r, isect& i) const {
+    
+ //   std::cout<< "geometry intersect\n";
+    
+    
 	double tmin, tmax;
+    
 	if (hasBoundingBoxCapability() && !(bounds.intersect(r, tmin, tmax))) return false;
+    
+  //  std::cout<< "after if\n";
+    
 	// Transform the ray into the object's local coordinate space
 	Vec3d pos = transform->globalToLocalCoords(r.p);
 	Vec3d dir = transform->globalToLocalCoords(r.p + r.d) - pos;
@@ -19,6 +27,7 @@ bool Geometry::intersect(ray& r, isect& i) const {
 	r.p = pos;
 	r.d = dir;
 	bool rtrn = false;
+  //  std::cout<< "Geometry before intersectLocal\n";
 	if (intersectLocal(r, i))
 	{
 		// Transform the intersection point & normal returned back into global space.
@@ -56,18 +65,28 @@ Scene::~Scene() {
 // intersection through the reference parameter.
 
 bool Scene::intersect(ray& r, isect& i) const {
+    
+   //  std::cout<< "scence->intersect\n";
+    
 	double tmin = 0.0;
 	double tmax = 0.0;
 	bool have_one = false;
 	typedef vector<Geometry*>::const_iterator iter;
+    int count = 0;
 	for(iter j = objects.begin(); j != objects.end(); ++j) {
 		isect cur;
+        count++;
+      //  std::cout<< "pbject count: "<< count <<"\n";
 		if( (*j)->intersect(r, cur) ) {
 			if(!have_one || (cur.t < i.t)) {
 				i = cur;
 				have_one = true;
 			}
-		}
+       //     std::cout<< "geometry intersect true\n";
+        } else {
+       //     std::cout<< "geometry intersect false\n";
+        }
+        
 	}
 	if(!have_one) i.setT(1000.0);
 	// if debugging,
@@ -77,8 +96,14 @@ bool Scene::intersect(ray& r, isect& i) const {
 
 TextureMap* Scene::getTexture(string name) {
 	tmap::const_iterator itr = textureCache.find(name);
+    
+    
+    
 	if(itr == textureCache.end()) {
 		textureCache[name] = new TextureMap(name);
+        
+        // std::cout<< "testureCache: " << name <<"\n";
+        
 		return textureCache[name];
 	} else return (*itr).second;
 }

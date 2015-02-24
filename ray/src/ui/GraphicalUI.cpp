@@ -45,20 +45,20 @@ void GraphicalUI::cb_load_scene(Fl_Menu_* o, void* v)
 	char* newfile = fl_file_chooser("Open Scene?", "*.ray", NULL );
 
     
-    std::cout<< "load file: " <<"\n";
+  //  std::cout<< "load file: " <<"\n";
     
 	if (newfile != NULL) {
 		char buf[256];
-        std::cout<< "before load scence: " <<"\n";
+   //     std::cout<< "before load scence: " <<"\n";
 		if (pUI->raytracer->loadScene(newfile)) {
             
-            std::cout<< "after load scence: " <<"\n";
+    //        std::cout<< "after load scence: " <<"\n";
             
 			print(buf, "Ray <%s>", newfile);
 			stopTracing();	// terminate the previous rendering
 		} else print(buf, "Ray <Not Loaded>");
 
-        std::cout<< "after load scence if: " <<"\n";
+     //   std::cout<< "after load scence if: " <<"\n";
         
 		pUI->m_mainWindow->label(buf);
 		pUI->m_debuggingWindow->m_debuggingView->setDirty();
@@ -70,7 +70,7 @@ void GraphicalUI::cb_load_scene(Fl_Menu_* o, void* v)
 	}
     
     
-    std::cout<< "finish load file: " <<"\n";
+  //  std::cout<< "finish load file: " <<"\n";
     
 }
 
@@ -167,7 +167,7 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 
 	char buffer[256];
 
-    std::cout<< "render: " <<"\n";
+  //  std::cout<< "render: " <<"\n";
     
 	pUI = (GraphicalUI*)(o->user_data());
 	doneTrace = stopTrace = false;
@@ -175,7 +175,7 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 	  {
           
           
-          std::cout<< "render confi: " <<"\n";
+    //      std::cout<< "render confi: " <<"\n";
           
 		int width = pUI->getSize();
 		int height = (int)(width / pUI->raytracer->aspectRatio() + 0.5);
@@ -185,9 +185,9 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 		pUI->raytracer->traceSetup(width, height);
 
           
-          std::cout<< "width, height: " << width <<","<<height<<"\n";
+     //     std::cout<< "width, height: " << width <<","<<height<<"\n";
           
-          std::cout<< "after traceSetup: " <<"\n";
+     //     std::cout<< "after traceSetup: " <<"\n";
           
           
           
@@ -367,7 +367,7 @@ GraphicalUI::GraphicalUI() : refreshInterval(10) {
 	m_depthSlider->labelfont(FL_COURIER);
 	m_depthSlider->labelsize(12);
 	m_depthSlider->minimum(0);
-	m_depthSlider->maximum(10);
+	m_depthSlider->maximum(30);
 	m_depthSlider->step(1);
 	m_depthSlider->value(m_nDepth);
 	m_depthSlider->align(FL_ALIGN_RIGHT);

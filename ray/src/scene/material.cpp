@@ -49,11 +49,10 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
   // compute shadows and light falloff.
     
     
+  //  std::cout<< "start material shade: " <<"\n";
+    
     Vec3d q = r.at(i.t);
     Vec3d I = ke(i);
-    
-    
-    
     
     bool semiTransparent = false;   //////modify
     
@@ -64,7 +63,7 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
     } else {
         
         I = I + ka(i) % scene->ambient();
-        std::cout<< "ka(i): " << ka(i)[0]<< ", " << ka(i)[1]<< ", "<< ka(i)[2]<< ", "<<"\n";
+//        std::cout<< "ka(i): " << ka(i)[0]<< ", " << ka(i)[1]<< ", "<< ka(i)[2]<< ", "<<"\n";
 
     }
     
@@ -73,33 +72,41 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
             Light* pLight = *litr;
         
             Vec3d atten = pLight->shadowAttenuation(r, q) * pLight->distanceAttenuation(q);
-            Vec3d aa = pLight->shadowAttenuation(r, q);
-            double a = pLight->distanceAttenuation(q);
-            std::cout<< "distanceAttenuation(i): " << a<<"\n";
-            std::cout<< "shadowAttenuation(i): " << aa[0]<< ", " << aa[1]<< ", "<< aa[2]<< ", "<<"\n";
+           // Vec3d aa = pLight->shadowAttenuation(r, q);
+          //  double a = pLight->distanceAttenuation(q);
+  //          std::cout<< "distanceAttenuation(i): " << a<<"\n";
+    //        std::cout<< "shadowAttenuation(i): " << aa[0]<< ", " << aa[1]<< ", "<< aa[2]<< ", "<<"\n";
         
             //diffuse
             Vec3d N = i.N;
             Vec3d L = pLight->getDirection(q);
-            Vec3d NL = N % L;
-            double NLv = NL[0] + NL[1] + NL[2];
+         //   Vec3d NL = N % L;
+         //   double NLv = NL[0] + NL[1] + NL[2];
+            double NLv = N * L;
             Vec3d diffuseTerm = kd(i) * fmax(0, NLv);
         
             //specular reflection
             Vec3d R = N * 2* NLv - L;
             Vec3d V = - r.getDirection();
-            Vec3d RV =  R % V;
-            double RVv = RV[0] + RV[1] + RV[2];
+       //     Vec3d RV =  R % V;
+       //     double RVv = RV[0] + RV[1] + RV[2];
             int ns = 64;
-            Vec3d specularTerm = ks(i) * pow (fmax(0, RVv), ns);
+            Vec3d specularTerm = ks(i) * pow (fmax(0, R * V), ns);
         
-            std::cout<< "RVv: " << RVv <<"\n";
-            std::cout<< "ks(i): " << ks(i)[0]<< ", " << ks(i)[1]<< ", "<< ks(i)[2]<< ", "<<"\n";
         
-            std::cout<< "diffuseTerm: " << diffuseTerm[0]<< ", " << diffuseTerm[1]<< ", "<< diffuseTerm[2]<< ", "<<"\n";
-            std::cout<< "specularTerm: " << specularTerm[0]<< ", " << specularTerm[1]<< ", "<< specularTerm[2]<< ", "<<"\n";
+        
+         //   double dotProd = N * L;
+         //   std::cout<< "N*L: " << dotProd <<"\n";
+         //   std::cout<< "NLv: " << NLv <<"\n";
+        
+   //         std::cout<< "RVv: " << RVv <<"\n";
+   //         std::cout<< "ks(i): " << ks(i)[0]<< ", " << ks(i)[1]<< ", "<< ks(i)[2]<< ", "<<"\n";
+        
+  //          std::cout<< "diffuseTerm: " << diffuseTerm[0]<< ", " << diffuseTerm[1]<< ", "<< diffuseTerm[2]<< ", "<<"\n";
+  //          std::cout<< "specularTerm: " << specularTerm[0]<< ", " << specularTerm[1]<< ", "<< specularTerm[2]<< ", "<<"\n";
 
             I = I + (diffuseTerm + specularTerm) % atten % pLight->getColor();
+    
         
           }
     

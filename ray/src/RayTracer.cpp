@@ -35,8 +35,11 @@ Vec3d RayTracer::trace(double x, double y)
 {
   // Clear out the ray cache in the scene for debugging purposes,
   if (TraceUI::m_debug) scene->intersectCache.clear();
+    
   ray r(Vec3d(0,0,0), Vec3d(0,0,0), ray::VISIBILITY);
+    
   scene->getCamera().rayThrough(x,y,r);
+    
   Vec3d ret = traceRay(r, traceUI->getDepth());
   ret.clamp();
   //  if (ret[0] != 0) std::cout<< "ret: " << ret[0]<< ", " << ret[1]<< ", "<< ret[2]<< ", "<<"\n";
@@ -72,12 +75,14 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
 	isect i;
 	Vec3d colorC;
     
-    std::cout<< "start trace: " <<"\n";
+   // std::cout<< "start trace: " <<"\n";
 
 	if(scene->intersect(r, i)) {
         
         
-        std::cout<< "has intersect: " <<"\n";
+      //  std::cout<< "has intersect: " <<"\n";
+    
+        
 		// YOUR CODE HERE
 
 		// An intersection occurred!  We've got work to do.  For now,
@@ -89,17 +94,15 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
         
-	  const Material& m = i.getMaterial();
-	  colorC = m.shade(scene, r, i);
+        const Material& m = i.getMaterial();
+        colorC = m.shade(scene, r, i);
         
         if (depth < 1) {
             
          //   std::cout<< "after shade\n";
          //   std::cout<< "colorC: " << colorC[0]<< ", " << colorC[1]<< ", "<< colorC[2]<< ", "<<"\n";
-            
             return colorC;
         }
-        
         
         
         //////reflection
@@ -110,13 +113,12 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
         Vec3d R = i.N * 2* NVv - V;
         
         ray new_r = ray(r.at(i.t), R, ray::VISIBILITY);
-        
         Vec3d a = m.kr(i) % traceRay(new_r,depth - 1);
         
         colorC = colorC + a;
         
         
-        std::cout<< "a: " << a[0]<< ", " << a[1]<< ", "<< a[2]<< ", "<<"\n";
+    //    std::cout<< "a: " << a[0]<< ", " << a[1]<< ", "<< a[2]<< ", "<<"\n";
         
         
         double nr = 0;
@@ -177,7 +179,7 @@ double RayTracer::aspectRatio()
 
 bool RayTracer::loadScene( char* fn ) {
     
-    std::cout<< "load scence: " <<"\n";
+  //  std::cout<< "load scence: " <<"\n";
     
 	ifstream ifs( fn );
 	if( !ifs ) {
