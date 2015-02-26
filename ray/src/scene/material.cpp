@@ -90,8 +90,8 @@ Vec3d Material::shade(Scene *scene, const ray& r, const isect& i) const
             Vec3d V = - r.getDirection();
        //     Vec3d RV =  R % V;
        //     double RVv = RV[0] + RV[1] + RV[2];
-            int ns = 64;
-            Vec3d specularTerm = ks(i) * pow (fmax(0, R * V), ns);
+          //  int ns = 64;
+            Vec3d specularTerm = ks(i) * pow (fmax(0, R * V), shininess(i));
         
         
         
@@ -162,6 +162,44 @@ Vec3d TextureMap::getMappedValue( const Vec2d& coord ) const
   // [0, 1] x [0, 1] in 2-space to bitmap coordinates,
   // and use these to perform bilinear interpolation
   // of the values.
+    
+    
+    std::cout<<"text mapping\n";
+    
+    
+    double coord_x = fmax(coord[0] * getWidth() - 1, 0);
+    double coord_y = fmax(coord[1] * getHeight() - 1, 0);
+    
+    int i = floor(coord_x);
+    int j = floor(coord_y);
+    
+     std::cout<< "i,j: " << i<< ", " << j<<"\n";
+    
+    
+    double delta_x = coord_x - i;
+    double delta_y = coord_y - j;
+    
+    Vec3d value;
+    
+    unsigned char *pixel_ij = data + (i + j * getWidth()) *3;
+    unsigned char *pixel_i1j = data + (i + 1 + j * getWidth()) *3;
+    unsigned char *pixel_ij1 = data + (i + (j + 1) * getWidth()) *3;
+    unsigned char *pixel_i1j1 = data + (i + 1 + ( j + 1 ) * getWidth()) *3;
+    
+    value[0] = (1 - delta_x) * (1 - delta_y) * pixel_ij[0] + delta_x * (1 - delta_y) * pixel_i1j[0] + (1-delta_x) * delta_y * pixel_ij1[0] + delta_x * delta_y * pixel_i1j1[0];
+    value[1] = (1 - delta_x) * (1 - delta_y) * pixel_ij[1] + delta_x * (1 - delta_y) * pixel_i1j[1] + (1-delta_x) * delta_y * pixel_ij1[1] + delta_x * delta_y * pixel_i1j1[1];
+    value[2] = (1 - delta_x) * (1 - delta_y) * pixel_ij[2] + delta_x * (1 - delta_y) * pixel_i1j[2] + (1-delta_x) * delta_y * pixel_ij1[2] + delta_x * delta_y * pixel_i1j1[2];
+    
+    std::cout<< "i,j: " << i<< ", " << j<<"\n";
+    
+    value[0] = double(value[0]) / 255.0;
+    value[1] = double(value[1]) / 255.0;
+    value[2] = double(value[2]) / 255.0;
+    
+    std::cout<< "value: " << value[0]<< ", " << value[1]<< ", "<< value[2]<< ", "<<"\n";
+    
+    
+    return value;
 
   return Vec3d(1,1,1);
 
