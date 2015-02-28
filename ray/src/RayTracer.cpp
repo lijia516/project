@@ -143,12 +143,21 @@ Vec3d RayTracer::traceRay(ray& r, int depth)
         }
         
         
+     //   std::cout<< "has intersection\n";
+     //  std::cout<< "colorC: " << colorC[0]<< ", " << colorC[1]<< ", "<< colorC[2]<< ", "<<"\n";
+        
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
+        
+        
+        
+        
 		colorC = Vec3d(0.0, 0.0, 0.0);
 	}
+    
+    
     
 	return colorC;
     

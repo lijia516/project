@@ -94,11 +94,8 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
     const Vec3d& a = parent->vertices[ids[0]];
     const Vec3d& b = parent->vertices[ids[1]];
     const Vec3d& c = parent->vertices[ids[2]];
-    
-    
 
     // YOUR CODE HERE
-    
     Vec3d N = (b - a) ^ (c - a);
     if (N == Vec3d(0,0,0)) return false;
     N.normalize();
@@ -120,7 +117,6 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
     // u and v
     
     double areaABC2 = ((b - a) ^ (c - a)).length();
-    
     double alpha = ((c - b) ^ (q - b)).length() / areaABC2;
     double beta = ((a - c) ^ (q - c)).length() / areaABC2;
     double gamma = ((b - a) ^ (q - a)).length() / areaABC2;
@@ -144,8 +140,6 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
     
     
     // normals
-    
-    
     if (parent->normals.size()) {
         
        Vec3d n = alpha * parent->normals[ids[0]];
