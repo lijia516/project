@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdarg.h>
+#include <thread>
 
 #ifndef COMMAND_LINE_ONLY
 
@@ -29,6 +30,9 @@ bool GraphicalUI::doneTrace = true;
 GraphicalUI* GraphicalUI::pUI = NULL;
 char* GraphicalUI::traceWindowLabel = "Raytraced Image";
 bool TraceUI::m_debug = false;
+
+static int gobal_y;
+static std::mutex _lock;
 
 //------------------------------------- Help Functions --------------------------------------------
 GraphicalUI* GraphicalUI::whoami(Fl_Menu_* o)	// from menu item back to UI itself
@@ -141,6 +145,11 @@ void GraphicalUI::cb_samplingSlides(Fl_Widget* o, void* v)
     ((GraphicalUI*)(o->user_data()))->m_nSampling=int( ((Fl_Slider *)o)->value() ) ;
 }
 
+void GraphicalUI::cb_multiThreadsSlides(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_nMultiThreads=int( ((Fl_Slider *)o)->value() ) ;
+}
+
 
 void GraphicalUI::cb_refreshSlides(Fl_Widget* o, void* v)
 {
@@ -174,9 +183,6 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 	if (pUI->raytracer->sceneLoaded())
 	  {
           
-          
-    //      std::cout<< "render confi: " <<"\n";
-          
 		int width = pUI->getSize();
 		int height = (int)(width / pUI->raytracer->aspectRatio() + 0.5);
 		int origPixels = width * height;
@@ -185,51 +191,81 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 		pUI->raytracer->traceSetup(width, height);
 
           
-     //     std::cout<< "width, height: " << width <<","<<height<<"\n";
-          
-     //     std::cout<< "after traceSetup: " <<"\n";
-          
           
           
 		// Save the window label
-                const char *old_label = pUI->m_traceGlWindow->label();
+        const char *old_label = pUI->m_traceGlWindow->label();
 
-		clock_t now, prev;
-		now = prev = clock();
-		clock_t intervalMS = pUI->refreshInterval * 100;
-		for (int y = 0; y < height; y++)
-		  {
-		    for (int x = 0; x < width; x++)
-		      {
-			if (stopTrace) break;
-			// check for input and refresh view every so often while tracing
-			now = clock();
-			if ((now - prev)/CLOCKS_PER_SEC * 1000 >= intervalMS)
-			  {
-			    prev = now;
-			    sprintf(buffer, "(%d%%) %s", (int)((double)y / (double)height * 100.0), old_label);
-			    pUI->m_traceGlWindow->label(buffer);
-			    pUI->m_traceGlWindow->refresh();
-			    Fl::check();
-			    if (Fl::damage()) { Fl::flush(); }
-			  }
-			// look for input and refresh window
-                  
-                  
-           //  std::cout<< "before tracePixel: " <<"\n";
-                  
-			pUI->raytracer->tracePixel(x, y);
-			pUI->m_debuggingWindow->m_debuggingView->setDirty();
-		      }
-		    if (stopTrace) break;
-		  }
-		doneTrace = true;
+        gobal_y = 0;
+      
+        int num = pUI->getMultiThreads();
+          
+        std::vector<std::thread> threads;
+          
+        for (int i = 0; i < num; i++) {
+              
+               threads.push_back(std::thread(call_from_thread, pUI, stopTrace, buffer, width, height, old_label));
+        }
+          
+        for(auto& t : threads)
+              t.join();
+          
+        doneTrace = true;
 		stopTrace = false;
 		// Restore the window label
 		pUI->m_traceGlWindow->label(old_label);
 		pUI->m_traceGlWindow->refresh();
 	  }
 }
+
+
+void GraphicalUI::call_from_thread(GraphicalUI* pUI, bool stopTrace, char* buffer, int width, int height, const char *old_label) {
+    
+    int y;
+    
+    clock_t now, prev;
+    now = prev = clock();
+    clock_t intervalMS = pUI->refreshInterval * 100;
+    
+    while (gobal_y <= height - 1) {
+    
+        
+        _lock.lock();
+        
+            y = gobal_y;
+            gobal_y++;
+        
+        std::cout<< "thead: " << std::this_thread::get_id() << "," << gobal_y<< "," << y <<"\n";
+        
+        _lock.unlock();
+        
+        
+        if (gobal_y > height) return;
+        
+        for (int x = 0; x < width; x++)
+            {
+           /*     if (stopTrace) break;
+                // check for input and refresh view every so often while tracing
+                now = clock();
+                if ((now - prev)/CLOCKS_PER_SEC * 1000 >= intervalMS)
+                {
+                    prev = now;
+                    sprintf(buffer, "(%d%%) %s", (int)((double)y / (double)height * 100.0), old_label);
+                    pUI->m_traceGlWindow->label(buffer);
+                    pUI->m_traceGlWindow->refresh();
+                    Fl::check();
+                    if (Fl::damage()) { Fl::flush(); }
+                }
+                // look for input and refresh window
+                
+              */  //std::cout<< "x, y " << x << "," << y <<"\n";
+                pUI->raytracer->tracePixel(x, y);
+              //  pUI->m_debuggingWindow->m_debuggingView->setDirty();
+            }
+            if (stopTrace) break;
+    }
+}
+
 
 void GraphicalUI::cb_stop(Fl_Widget* o, void* v)
 {
@@ -413,6 +449,22 @@ GraphicalUI::GraphicalUI() : refreshInterval(10) {
     m_samplingSlider->value(m_nSampling);
     m_samplingSlider->align(FL_ALIGN_RIGHT);
     m_samplingSlider->callback(cb_samplingSlides);
+    
+    
+    
+    
+    // install sampling slider
+    m_multiThreadsSlider = new Fl_Value_Slider(10, 150, 180, 20, "threads number");
+    m_multiThreadsSlider->user_data((void*)(this));	// record self to be used by static callback functions
+    m_multiThreadsSlider->type(FL_HOR_NICE_SLIDER);
+    m_multiThreadsSlider->labelfont(FL_COURIER);
+    m_multiThreadsSlider->labelsize(12);
+    m_multiThreadsSlider->minimum(1);
+    m_multiThreadsSlider->maximum(16);
+    m_multiThreadsSlider->step(1);
+    m_multiThreadsSlider->value(m_nMultiThreads);
+    m_multiThreadsSlider->align(FL_ALIGN_RIGHT);
+    m_multiThreadsSlider->callback(cb_multiThreadsSlides);
     
 
 	// set up debugging display checkbox
