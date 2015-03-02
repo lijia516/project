@@ -175,41 +175,64 @@ void GraphicalUI::cb_debuggingDisplayCheckButton(Fl_Widget* o, void* v)
 void GraphicalUI::cb_render(Fl_Widget* o, void* v) {
 
 	char buffer[256];
-
-  //  std::cout<< "render: " <<"\n";
     
 	pUI = (GraphicalUI*)(o->user_data());
 	doneTrace = stopTrace = false;
 	if (pUI->raytracer->sceneLoaded())
 	  {
-          
 		int width = pUI->getSize();
 		int height = (int)(width / pUI->raytracer->aspectRatio() + 0.5);
 		int origPixels = width * height;
 		pUI->m_traceGlWindow->resizeWindow(width, height);
 		pUI->m_traceGlWindow->show();
 		pUI->raytracer->traceSetup(width, height);
-
-          
-          
           
 		// Save the window label
         const char *old_label = pUI->m_traceGlWindow->label();
-
-        gobal_y = 0;
-      
-        int num = pUI->getMultiThreads();
           
-        std::vector<std::thread> threads;
-          
-        for (int i = 0; i < num; i++) {
+          if (false) {
+              gobal_y = 0;
+              int num = pUI->getMultiThreads();
+              std::vector<std::thread> threads;
+              for (int i = 0; i < num; i++) {
               
-               threads.push_back(std::thread(call_from_thread, pUI, stopTrace, buffer, width, height, old_label));
-        }
-          
-        for(auto& t : threads)
-              t.join();
-          
+                  threads.push_back(std::thread(call_from_thread, pUI, stopTrace, buffer, width, height, old_label));
+              }
+              for(auto& t : threads) t.join();
+              
+          } else {
+              
+              clock_t now, prev;
+              now = prev = clock();
+              clock_t intervalMS = pUI->refreshInterval * 100;
+              
+              for (int y = 0; y < height; y++)
+              {
+                  for (int x = 0; x < width; x++)
+                  {
+                      if (stopTrace) break;
+                      // check for input and refresh view every so often while tracing
+                      now = clock();
+                      if ((now - prev)/CLOCKS_PER_SEC * 1000 >= intervalMS)
+                      {
+                          prev = now;
+                          sprintf(buffer, "(%d%%) %s", (int)((double)y / (double)height * 100.0), old_label);
+                          pUI->m_traceGlWindow->label(buffer);
+                          pUI->m_traceGlWindow->refresh();
+                          Fl::check();
+                          if (Fl::damage()) { Fl::flush(); }
+                      }
+                      // look for input and refresh window
+                      
+                      
+                      //  std::cout<< "before tracePixel: " <<"\n";
+                      
+                      pUI->raytracer->tracePixel(x, y);
+                      pUI->m_debuggingWindow->m_debuggingView->setDirty();
+                  }
+                  if (stopTrace) break;
+              }
+          }
         doneTrace = true;
 		stopTrace = false;
 		// Restore the window label
@@ -235,7 +258,7 @@ void GraphicalUI::call_from_thread(GraphicalUI* pUI, bool stopTrace, char* buffe
             y = gobal_y;
             gobal_y++;
         
-        std::cout<< "thead: " << std::this_thread::get_id() << "," << gobal_y<< "," << y <<"\n";
+       // std::cout<< "thead: " << std::this_thread::get_id() << "," << gobal_y<< "," << y <<"\n";
         
         _lock.unlock();
         
@@ -244,21 +267,21 @@ void GraphicalUI::call_from_thread(GraphicalUI* pUI, bool stopTrace, char* buffe
         
         for (int x = 0; x < width; x++)
             {
-           /*     if (stopTrace) break;
+                if (stopTrace) break;
                 // check for input and refresh view every so often while tracing
-                now = clock();
-                if ((now - prev)/CLOCKS_PER_SEC * 1000 >= intervalMS)
-                {
-                    prev = now;
-                    sprintf(buffer, "(%d%%) %s", (int)((double)y / (double)height * 100.0), old_label);
-                    pUI->m_traceGlWindow->label(buffer);
-                    pUI->m_traceGlWindow->refresh();
-                    Fl::check();
-                    if (Fl::damage()) { Fl::flush(); }
-                }
+               // now = clock();
+               // if ((now - prev)/CLOCKS_PER_SEC * 1000 >= intervalMS)
+               // {
+                //      prev = now;
+                //      sprintf(buffer, "(%d%%) %s", (int)((double)y / (double)height * 100.0), old_label);
+                //      pUI->m_traceGlWindow->label(buffer);
+                //      pUI->m_traceGlWindow->refresh();
+                //      Fl::check();
+                //     if (Fl::damage()) { Fl::flush(); }
+               // }
                 // look for input and refresh window
                 
-              */  //std::cout<< "x, y " << x << "," << y <<"\n";
+                //std::cout<< "x, y " << x << "," << y <<"\n";
                 pUI->raytracer->tracePixel(x, y);
               //  pUI->m_debuggingWindow->m_debuggingView->setDirty();
             }
